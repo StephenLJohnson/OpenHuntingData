@@ -1,0 +1,4 @@
+[submodule "SubmissionForm"]
+	path = SubmissionForm
+	url = https://github.com/OpenBounds/SubmissionForm.git
+	branch = master
