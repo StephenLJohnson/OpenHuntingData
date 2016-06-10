@@ -39,7 +39,19 @@
                 </p>
                 </div>
 
-                <form name="submission" style="display: none">
+                <form name="submission" style="display: block">
+                   <dl class="form">
+                        <dt>
+                            <label for="datasetname">Dataset Name</label>
+                        </dt>
+                        <dd>
+                            <input type="text" name="datasetname" id="datasetname" placeholder="Elk Units">
+                            <p class="note">
+                                User readable name for this dataset. Should not include name of state.
+                            </p>
+                        </dd>
+                    </dl>
+
                     <dl class="form">
                         <dt>
                             <label for="url">Public Data URL</label>
@@ -204,6 +216,16 @@
             </div>
         </div>
     </div>
-    <script type="text/javascript" src="SubmissionForm/dist/submission.min.js"></script>
+    <script type="text/javascript" src="SubmissionForm/dist/submission.js"></script>
+    <script type="text/javascript">
+        function getDatasetSpecificFields() {
+            var form = window.document.forms['submission'];
+            return {
+                species: form.species.value.split(', '),
+                country: form.country.value,
+                state: form.state.value
+            };
+        };
+    </script>
 </body>
 </html>
