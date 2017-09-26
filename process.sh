@@ -3,8 +3,24 @@ RESULT_DIR=generated
 
 set -ex
 
+if [ ! -e tilelive ]; then		 
+	git clone https://github.com/mapbox/tilelive.git		 
+	cd tilelive
+    npm install
+	npm install mbtiles tilelive-merge tilelive-tmstyle
+    cd ..		      
+fi
+
+if [ ! -e tl ]; then
+	git clone https://github.com/mojodna/tl.git
+	cd tl
+	npm install
+	npm install mbtiles tilelive-tmstyle tilelive-vector
+	cd ..
+fi
+
 echo "Generating geojson"
-DOWNLOAD_CACHE=cache python ./Processing/process.py sources/ $RESULT_DIR 2>&1 
+#DOWNLOAD_CACHE=cache python ./Processing/process.py sources/ $RESULT_DIR 2>&1 
 
 VECTOR_MAXZOOM=13
 VECTOR_MINZOOM=5
@@ -47,9 +63,11 @@ for i in $RESULT_DIR/*/*/*.geojson; do
          -z 10
 
         echo Merging data and label mbtiles
+        
 
         COMBINED_MBTILES=$WORK_DIR/combined.mbtiles 
         mortar --output $COMBINED_MBTILES $DATA_MBTILES $LABELS_MBTILES
+        
 
         mv $COMBINED_MBTILES $VECTOR_MBTILES
     else
@@ -57,17 +75,17 @@ for i in $RESULT_DIR/*/*/*.geojson; do
         mv $DATA_MBTILES $VECTOR_MBTILES
     fi
 
-    echo "Uploading vector tiles"
-    python ./Processing/upload_mbtiles.py --extension ".pbf" \
-     --threads 100 \
-     $VECTOR_MBTILES \
-     s3://data.openbounds.org/USAHunting/vector/`dirname $i`/`basename $i .geojson`/
+    #echo "Uploading vector tiles"
+    #python ./Processing/upload_mbtiles.py --extension ".pbf" \
+    # --threads 100 \
+    # $VECTOR_MBTILES \
+    # s3://data.openbounds.org/USAHunting/vector/`dirname $i`/`basename $i .geojson`/
 
     rm -r $WORK_DIR
 done
 
-echo "Uploading to s3"
-s3cmd sync $RESULT_DIR s3://data.openbounds.org/USAHunting/
+#echo "Uploading to s3"
+#s3cmd sync $RESULT_DIR s3://data.openbounds.org/USAHunting/
 
 STYLE_DIR=styles
 if [ -e $STYLE_DIR ]; then
@@ -76,4 +94,4 @@ fi
 
 mkdir $STYLE_DIR
 ./build-gl-style.py $STYLE_DIR generated/catalog.geojson > $STYLE_DIR/styles.json
-s3cmd sync $STYLE_DIR s3://data.openbounds.org/USAHunting/
+#s3cmd sync $STYLE_DIR s3://data.openbounds.org/USAHunting/
